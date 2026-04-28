@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fill in the Blank — World of Books</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #308349;
+    --dark-green: #005748;
+    --light-green: #ACE2B2;
+    --mint: #ECF9ED;
+    --off-white: #F8F6F3;
+    --dark: #1D1D1D;
+    --coral: #E5657C;
+    --white: #ffffff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--dark-green);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-x: hidden;
+  }
+
+  /* Subtle texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle at 20% 20%, rgba(48,131,73,0.3) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 80%, rgba(172,226,178,0.15) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .screen {
+    display: none;
+    width: 100%;
+    max-width: 860px;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 0.5s ease forwards;
+  }
+  .screen.active { display: flex; flex-direction: column; align-items: center; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* LOGO */
+  .logo {
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-icon {
+    width: 44px; height: 44px;
+    background: var(--green);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  .logo-text {
+    font-family: 'Playfair Display', serif;
+    color: var(--white);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .logo-text span { color: var(--light-green); }
+
+  /* CARD */
+  .card {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 48px 52px;
+    width: 100%;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+  }
+
+  /* TITLE SCREEN */
+  .title-badge {
+    background: var(--light-green);
+    color: var(--dark-green);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    display: inline-block;
+  }
+  .title-main {
+    font-family: 'Playfair Display', serif;
+    font-size: 58px;
+    font-weight: 900;
+    color: var(--dark-green);
+    line-height: 1.05;
+    margin-bottom: 8px;
+  }
+  .title-main span { color: var(--green); }
+  .title-sub {
+    font-size: 17px;
+    color: #666;
+    margin-bottom: 32px;
+    line-height: 1.6;
+  }
+  .rules {
+    background: var(--mint);
+    border-left: 4px solid var(--green);
+    border-radius: 0 12px 12px 0;
+    padding: 18px 22px;
+    margin-bottom: 36px;
+  }
+  .rules p {
+    font-size: 14px;
+    color: var(--dark);
+    line-height: 1.7;
+  }
+  .rules p + p { margin-top: 6px; }
+  .rules strong { color: var(--dark-green); }
+
+
+
+  /* QUESTION SCREEN */
+  .question-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .q-number {
+    background: var(--dark-green);
+    color: white;
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px 18px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+  .q-source {
+    font-size: 12px;
+    color: #999;
+    font-style: italic;
+  }
+  .progress-bar {
+    width: 100%;
+    height: 4px;
+    background: #eee;
+    border-radius: 2px;
+    margin-bottom: 32px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+
+  .quote-block {
+    background: var(--off-white);
+    border-radius: 16px;
+    padding: 32px 36px;
+    margin-bottom: 32px;
+    position: relative;
+  }
+  .quote-mark {
+    font-family: 'Playfair Display', serif;
+    font-size: 80px;
+    color: var(--light-green);
+    line-height: 0.6;
+    position: absolute;
+    top: 24px;
+    left: 24px;
+  }
+  .quote-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--dark);
+    line-height: 1.55;
+    padding-left: 28px;
+    padding-top: 16px;
+  }
+  .blank {
+    display: inline-block;
+    background: var(--dark-green);
+    color: var(--dark-green);
+    border-radius: 6px;
+    padding: 2px 32px;
+    margin: 0 4px;
+    font-size: 20px;
+    vertical-align: middle;
+    min-width: 100px;
+    text-align: center;
+    transition: all 0.4s ease;
+    user-select: none;
+  }
+  .blank.revealed {
+    background: var(--green);
+    color: white;
+    padding: 2px 18px;
+  }
+  .quote-attribution {
+    font-size: 13px;
+    color: #999;
+    margin-top: 16px;
+    padding-left: 28px;
+    font-style: italic;
+  }
+
+  /* OPTIONS GRID */
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+  .option-btn {
+    background: white;
+    border: 2px solid #e5e5e5;
+    border-radius: 14px;
+    padding: 18px 20px;
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    color: var(--dark);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--green);
+    background: var(--mint);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(48,131,73,0.15);
+  }
+  .option-letter {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--off-white);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'Lato', sans-serif;
+    color: #888;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+  .option-btn:hover:not(:disabled) .option-letter {
+    background: var(--green);
+    color: white;
+  }
+  .option-btn.correct {
+    border-color: var(--green);
+    background: var(--mint);
+    animation: correctPop 0.4s ease;
+  }
+  .option-btn.correct .option-letter {
+    background: var(--green);
+    color: white;
+  }
+  .option-btn.wrong {
+    border-color: var(--coral);
+    background: #fdf0f2;
+    opacity: 0.6;
+  }
+  .option-btn.wrong .option-letter {
+    background: var(--coral);
+    color: white;
+  }
+  .option-btn:disabled { cursor: default; transform: none !important; }
+
+  @keyframes correctPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+  }
+
+  /* REVEAL STATE */
+  .reveal-banner {
+    display: none;
+    background: var(--green);
+    color: white;
+    border-radius: 12px;
+    padding: 16px 24px;
+    margin-bottom: 24px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    animation: fadeUp 0.3s ease;
+  }
+  .reveal-banner.show { display: block; }
+  .reveal-banner.fun-fact {
+    background: var(--mint);
+    color: var(--dark-green);
+    font-weight: 400;
+    font-size: 13px;
+    margin-top: -16px;
+    margin-bottom: 24px;
+    border: 1px solid var(--light-green);
+    padding: 12px 20px;
+    text-align: left;
+  }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 36px;
+    border-radius: 12px;
+    font-family: 'Lato', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+  }
+  .btn-primary {
+    background: var(--green);
+    color: white;
+    width: 100%;
+  }
+  .btn-primary:hover {
+    background: var(--dark-green);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,87,72,0.3);
+  }
+  .btn-secondary {
+    background: var(--off-white);
+    color: var(--dark-green);
+    width: 100%;
+    border: 2px solid var(--light-green);
+  }
+  .btn-secondary:hover {
+    background: var(--mint);
+    transform: translateY(-2px);
+  }
+  .btn-host {
+    background: transparent;
+    border: 2px solid rgba(255,255,255,0.3);
+    color: rgba(255,255,255,0.7);
+    font-size: 12px;
+    padding: 8px 20px;
+    margin-top: 16px;
+    border-radius: 8px;
+  }
+  .btn-host:hover {
+    border-color: rgba(255,255,255,0.6);
+    color: white;
+  }
+
+  /* HOST CONTROLS */
+  .host-bar {
+    display: none;
+    width: 100%;
+    max-width: 860px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 14px;
+    padding: 16px 24px;
+    margin-top: 20px;
+    z-index: 1;
+    position: relative;
+    animation: fadeUp 0.3s ease;
+  }
+  .host-bar.show { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .host-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 4px;
+  }
+  .host-info {
+    font-size: 14px;
+    color: rgba(255,255,255,0.85);
+    font-weight: 700;
+  }
+  .btn-next {
+    background: var(--light-green);
+    color: var(--dark-green);
+    border: none;
+    padding: 12px 28px;
+    border-radius: 10px;
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+  .btn-next:hover {
+    background: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  /* SCORE SCREEN */
+  .score-display {
+    font-family: 'Playfair Display', serif;
+    font-size: 96px;
+    font-weight: 900;
+    color: var(--green);
+    line-height: 1;
+    margin: 16px 0;
+  }
+  .score-display span {
+    font-size: 36px;
+    color: #aaa;
+  }
+  .score-message {
+    font-size: 20px;
+    color: var(--dark);
+    margin-bottom: 8px;
+    font-family: 'Playfair Display', serif;
+  }
+  .score-sub {
+    font-size: 14px;
+    color: #999;
+    margin-bottom: 36px;
+  }
+  .score-breakdown {
+    width: 100%;
+    margin-bottom: 32px;
+  }
+  .score-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+  }
+  .score-row:last-child { border-bottom: none; }
+  .score-row-title { color: #666; font-style: italic; }
+  .score-row-result {
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .score-row-result.correct-r { color: var(--green); }
+  .score-row-result.wrong-r { color: var(--coral); }
+
+  /* CONFETTI */
+  .confetti-piece {
+    position: fixed;
+    width: 10px; height: 10px;
+    top: -10px;
+    animation: confettiFall linear forwards;
+    border-radius: 2px;
+    z-index: 100;
+    pointer-events: none;
+  }
+  @keyframes confettiFall {
+    to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .card { padding: 32px 24px; }
+    .title-main { font-size: 40px; }
+    .options-grid { grid-template-columns: 1fr; }
+    .quote-text { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════ TITLE SCREEN -->
+<div class="screen active" id="screen-title">
+  <div class="logo">
+    <div class="logo-icon">📚</div>
+    <div class="logo-text">World of <span>Books</span></div>
+  </div>
+  <div class="card">
+    <div class="title-badge">Team Icebreaker</div>
+    <div class="title-main">Fill in the<br><span>Blank</span></div>
+    <div class="title-sub">Ten quotes from famous books — with one word missing.<br>How many can you get right?</div>
+    <div class="rules">
+      <p>📖 <strong>How to play:</strong> A quote appears on screen with a missing word.</p>
+      <p>🤔 <strong>Four options</strong> are shown — shout out your answer!</p>
+      <p>✅ <strong>After each round</strong> the answer is revealed. Keep track of your score.</p>
+      <p>🏆 <strong>At the end</strong> — how many did you get?</p>
+    </div>
+    <button class="btn btn-primary" onclick="startGame()">Let's Play →</button>
+  </div>
+  <button class="btn btn-host" onclick="toggleHost()">🎮 Host Mode</button>
+</div>
+
+
+
+<!-- ═══════════════════════════════════════════════ QUESTION SCREEN -->
+<div class="screen" id="screen-question">
+  <div class="logo">
+    <div class="logo-icon">📚</div>
+    <div class="logo-text">World of <span>Books</span></div>
+  </div>
+  <div class="card">
+    <div class="question-meta">
+      <div class="q-number" id="q-number">Question 1 of 10</div>
+      <div class="q-source" id="q-source"></div>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="quote-block">
+      <div class="quote-mark">"</div>
+      <div class="quote-text" id="q-text"></div>
+      <div class="quote-attribution" id="q-attribution"></div>
+    </div>
+    <div class="reveal-banner" id="q-reveal"></div>
+    <div class="reveal-banner fun-fact" id="q-funfact"></div>
+    <div class="options-grid" id="q-options"></div>
+  </div>
+</div>
+
+<!-- HOST BAR -->
+<div class="host-bar" id="host-bar">
+  <div>
+    <div class="host-label">Host Controls</div>
+    <div class="host-info" id="host-info">Ready</div>
+  </div>
+  <button class="btn-next" id="btn-next" onclick="hostNext()">Next →</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════ SCORE SCREEN -->
+<div class="screen" id="screen-score">
+  <div class="logo">
+    <div class="logo-icon">📚</div>
+    <div class="logo-text">World of <span>Books</span></div>
+  </div>
+  <div class="card" style="text-align:center;">
+    <div class="title-badge">Game Over</div>
+    <div class="score-message" id="score-message">How did you do?</div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#aaa;margin-top:16px;">Team Score</div>
+    <div class="score-display" id="score-display">0<span>/10</span></div>
+    <div class="score-sub" id="score-sub"></div>
+    <div class="score-breakdown" id="score-breakdown"></div>
+    <button class="btn btn-primary" onclick="restartGame()">Play Again</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    source: "Harry Potter & The Philosopher's Stone — J.K. Rowling",
+    attribution: "— Hermione Granger",
+    before: "Just because you have the emotional range of a ",
+    blank: "Teaspoon",
+    after: " doesn't mean we all have.",
+    options: ["Houseplant", "Teaspoon", "Spreadsheet", "Golden Retriever"],
+    correct: 1,
+    funfact: "Hermione delivers this line to Ron in Order of the Phoenix. 'Golden Retriever' would also be very on-brand for Ron."
+  },
+  {
+    source: "The Hitchhiker's Guide to the Galaxy — Douglas Adams",
+    attribution: "— The Guide",
+    before: "Don't ",
+    blank: "Panic",
+    after: ".",
+    options: ["Panic", "Reply All", "Ask Your Mum", "Cry About It"],
+    correct: 0,
+    funfact: "These two words, printed on the cover of the Guide in large, friendly letters, are arguably the most important advice in the universe."
+  },
+  {
+    source: "Bridget Jones's Diary — Helen Fielding",
+    attribution: "— Bridget Jones",
+    before: "It is a truth universally acknowledged that when one part of your life starts going okay, another falls spectacularly to ",
+    blank: "Pieces",
+    after: ".",
+    options: ["Pieces", "Ben & Jerry's", "Ruin", "Karaoke"],
+    correct: 0,
+    funfact: "A riff on the opening of Pride and Prejudice — which is also in this quiz. Bridget Jones is basically Elizabeth Bennet with a better wine selection."
+  },
+  {
+    source: "The Da Vinci Code — Dan Brown",
+    attribution: "— Robert Langdon",
+    before: "The ",
+    blank: "Grail",
+    after: " is not what you think it is.",
+    options: ["Grail", "Biscuit", "Password", "Answer"],
+    correct: 0,
+    funfact: "The Da Vinci Code sold 80 million copies. Eighty million. Let that sink in."
+  },
+  {
+    source: "Pride and Prejudice — Jane Austen",
+    attribution: "— Caroline Bingley",
+    before: "I declare after all there is no enjoyment like ",
+    blank: "Reading",
+    after: "!",
+    options: ["Reading", "A Cheeky Prosecco", "The Outdoors", "Friendships"],
+    correct: 0,
+    funfact: "Delicious irony: Caroline says this while spectacularly failing to read anything, purely to impress Mr Darcy."
+  },
+  {
+    source: "Hamlet — William Shakespeare",
+    attribution: "— Hamlet",
+    before: "Alas, poor Yorick! I knew him, ",
+    blank: "Horatio",
+    after: ".",
+    options: ["Horatio", "Well", "The Best", "In Passing"],
+    correct: 0,
+    funfact: "Almost everyone misremembers this as 'I knew him well.' The word 'well' doesn't appear anywhere in this speech. Horatio is standing right next to him."
+  },
+  {
+    source: "Hogfather — Terry Pratchett",
+    attribution: "— Terry Pratchett",
+    before: "Real children do not go hoppity skip unless they are ",
+    blank: "On Drugs",
+    after: ".",
+    options: ["On Drugs", "Very Excited", "Given Sweets", "At a Work Conference"],
+    correct: 0,
+    funfact: "Terry Pratchett had 0% tolerance for saccharine depictions of childhood. Hogfather is technically a Christmas book, which tells you everything."
+  },
+  {
+    source: "Spare — Prince Harry",
+    attribution: "— Prince Harry",
+    before: "I was ",
+    blank: "Devastated",
+    after: ". I was blindsided.",
+    options: ["Devastated", "Bored", "Late", "On a Gap Year"],
+    correct: 0,
+    funfact: "Spare sold 1.4 million copies on its first day of release. It is, without question, the most dramatic memoir ever written by someone who owns a Montecito mansion."
+  },
+  {
+    source: "Twilight — Stephenie Meyer",
+    attribution: "— Edward Cullen",
+    before: "Beautiful? This is the skin of a ",
+    blank: "Killer",
+    after: ", Bella.",
+    options: ["Hunter", "Killer", "Predator", "Disco Ball"],
+    correct: 1,
+    funfact: "'Disco Ball' is not entirely unfair — Edward does literally sparkle in sunlight. Stephenie Meyer has never addressed this adequately."
+  },
+  {
+    source: "The Lord of the Rings — J.R.R. Tolkien",
+    attribution: "— Bilbo Baggins",
+    before: "It's a dangerous business, Frodo, ",
+    blank: "Going Out Your Door",
+    after: ".",
+    options: ["Going Out Your Door", "Drinking Pints", "Trusting Gollum", "Going to Mordor"],
+    correct: 0,
+    funfact: "The full quote continues: '...you step into the Road, and if you don't keep your feet, there is no knowing where you might be swept off to.' Tolkien really committed to the bit."
+  }
+];
+
+let currentQ = 0;
+let answered = false;
+let revealed = false;
+let hostMode = false;
+let userAnswers = [];
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  el.classList.remove('active');
+  void el.offsetWidth;
+  el.classList.add('active');
+}
+
+function toggleHost() {
+  hostMode = !hostMode;
+  const bar = document.getElementById('host-bar');
+  bar.classList.toggle('show', hostMode);
+  updateHostBar();
+}
+
+function updateHostBar() {
+  if (!hostMode) return;
+  const info = document.getElementById('host-info');
+  const btn = document.getElementById('btn-next');
+  if (currentQ === 0 && !answered) {
+    info.textContent = 'Waiting for question...';
+    btn.style.display = 'none';
+  } else if (answered && !revealed) {
+    info.textContent = `Q${currentQ} answered → Click Next to reveal answer`;
+    btn.style.display = 'block';
+    btn.textContent = 'Reveal Answer →';
+  } else if (revealed && currentQ < questions.length) {
+    info.textContent = currentQ < questions.length ? `Answer shown → Click Next for Q${currentQ + 1}` : 'Last question done → Click Next for scores';
+    btn.style.display = 'block';
+    btn.textContent = currentQ < questions.length ? 'Next Question →' : 'See Scores →';
+  }
+}
+
+function hostNext() {
+  if (answered && !revealed) {
+    revealAnswer();
+  } else if (revealed) {
+    if (currentQ >= questions.length) {
+      showScore();
+    } else {
+      loadQuestion(currentQ);
+    }
+  }
+}
+
+function startGame() {
+  currentQ = 0;
+  userAnswers = [];
+  loadQuestion(0);
+}
+
+function loadQuestion(index) {
+  answered = false;
+  revealed = false;
+  const q = questions[index];
+  showScreen('screen-question');
+
+  document.getElementById('q-number').textContent = `Question ${index + 1} of ${questions.length}`;
+  document.getElementById('q-source').textContent = q.source;
+  document.getElementById('q-attribution').textContent = q.attribution || '';
+  document.getElementById('progress-fill').style.width = `${(index / questions.length) * 100}%`;
+
+  // Build quote text
+  const textEl = document.getElementById('q-text');
+  textEl.innerHTML = '';
+  const before = document.createTextNode(q.before);
+  const blankEl = document.createElement('span');
+  blankEl.className = 'blank';
+  blankEl.id = 'q-blank';
+  blankEl.textContent = '________';
+  const after = document.createTextNode(q.after);
+  textEl.appendChild(before);
+  textEl.appendChild(blankEl);
+  textEl.appendChild(after);
+
+  // Reset reveal banners
+  const reveal = document.getElementById('q-reveal');
+  const funfact = document.getElementById('q-funfact');
+  reveal.className = 'reveal-banner';
+  reveal.textContent = '';
+  funfact.className = 'reveal-banner fun-fact';
+  funfact.textContent = '';
+
+  // Build options
+  const optEl = document.getElementById('q-options');
+  optEl.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  // Shuffle options but track correct
+  const shuffled = q.options.map((text, i) => ({ text, isCorrect: i === q.correct }));
+  shuffled.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<div class="option-letter">${letters[i]}</div>${opt.text}`;
+    btn.onclick = () => selectAnswer(btn, opt.isCorrect, opt.text, q, shuffled);
+    optEl.appendChild(btn);
+  });
+
+  updateHostBar();
+}
+
+function selectAnswer(clickedBtn, isCorrect, chosenText, q, shuffled) {
+  if (answered) return;
+  answered = true;
+  userAnswers.push({ source: q.source.split('—')[0].trim(), correct: isCorrect });
+
+  const allBtns = document.querySelectorAll('#q-options .option-btn');
+  allBtns.forEach((btn, i) => {
+    btn.disabled = true;
+    if (shuffled[i].isCorrect) btn.classList.add('correct');
+    else if (btn === clickedBtn && !isCorrect) btn.classList.add('wrong');
+  });
+
+  if (!hostMode) {
+    setTimeout(() => revealAnswer(), 400);
+  } else {
+    updateHostBar();
+  }
+}
+
+function revealAnswer() {
+  revealed = true;
+  const q = questions[currentQ];
+  const blank = document.getElementById('q-blank');
+  blank.textContent = q.blank;
+  blank.classList.add('revealed');
+
+  const reveal = document.getElementById('q-reveal');
+  const lastAnswer = userAnswers[userAnswers.length - 1];
+  reveal.textContent = lastAnswer && lastAnswer.correct ? `✅ Correct! The answer is "${q.blank}"` : `The answer is "${q.blank}"`;
+  reveal.classList.add('show');
+
+  const funfact = document.getElementById('q-funfact');
+  funfact.innerHTML = `<strong>${q.source.split('—')[0].trim()}</strong> — ${q.funfact}`;
+  funfact.classList.add('show');
+
+  currentQ++;
+
+  if (!hostMode) {
+    const delay = currentQ >= questions.length ? 5500 : 6500;
+    setTimeout(() => {
+      if (currentQ >= questions.length) showScore();
+      else loadQuestion(currentQ);
+    }, delay);
+  } else {
+    updateHostBar();
+  }
+}
+
+function showScore() {
+  const correct = userAnswers.filter(a => a.correct).length;
+  showScreen('screen-score');
+
+  document.getElementById('score-display').innerHTML = `${correct}<span>/10</span>`;
+
+  const messages = [
+    [0, 2, "Hmm. Maybe try reading some books?", "Don't worry — we've got millions of them."],
+    [3, 4, "A slow start. Respect for trying.", "There's always the preloved section for revision."],
+    [5, 6, "Not bad at all!", "A solid mid-table finish. We'd take that."],
+    [7, 8, "Impressively bookish.", "You clearly spend a lot of time with your nose in a good book."],
+    [9, 9, "Nearly perfect!", "One slipped through. Which one was it?"],
+    [10, 10, "Full marks. Actual legend.", "We'd let you write our catalogue copy."]
+  ];
+  const [,, msg, sub] = messages.find(([min, max]) => correct >= min && correct <= max);
+  document.getElementById('score-message').textContent = msg;
+  document.getElementById('score-sub').textContent = sub;
+
+  // Breakdown
+  const breakdown = document.getElementById('score-breakdown');
+  breakdown.innerHTML = userAnswers.map(a => `
+    <div class="score-row">
+      <div class="score-row-title">${a.source}</div>
+      <div class="score-row-result ${a.correct ? 'correct-r' : 'wrong-r'}">${a.correct ? '✓' : '✗'}</div>
+    </div>
+  `).join('');
+
+  if (correct >= 7) launchConfetti();
+}
+
+function launchConfetti() {
+  const colors = ['#308349','#ACE2B2','#E5657C','#005748','#6883FF','#F8F6F3'];
+  for (let i = 0; i < 60; i++) {
+    setTimeout(() => {
+      const c = document.createElement('div');
+      c.className = 'confetti-piece';
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.animationDuration = (2 + Math.random() * 2) + 's';
+      c.style.animationDelay = Math.random() * 0.5 + 's';
+      c.style.transform = `rotate(${Math.random() * 360}deg)`;
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 4000);
+    }, i * 30);
+  }
+}
+
+function restartGame() {
+  currentQ = 0;
+  userAnswers = [];
+  answered = false;
+  revealed = false;
+  showScreen('screen-title');
+}
+</script>
+</body>
+</html>
